@@ -2,6 +2,7 @@ package com.example.doglist
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.doglist.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,12 +13,16 @@ import retrofit2.create
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var adapter: DogAdapter
+    private val dogImages = mutableListOf<String>()
+
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        initRecyclerView()
     }
 
     private fun getRetrofit() : Retrofit {
@@ -37,6 +42,12 @@ class MainActivity : AppCompatActivity() {
                     //show error
                 }
         }
+    }
+
+    private fun initRecyclerView() {
+        adapter = DogAdapter(dogImages)
+        binding.rvDogs.layoutManager = LinearLayoutManager(this)
+        binding.rvDogs.adapter = adapter
     }
 
 }
