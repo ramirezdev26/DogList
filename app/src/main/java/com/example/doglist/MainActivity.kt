@@ -2,6 +2,8 @@ package com.example.doglist
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.doglist.databinding.ActivityMainBinding
@@ -10,9 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), androidx.appcompat.widget.SearchView.OnQueryTextListener {
 
     private lateinit var adapter: DogAdapter
     private val dogImages = mutableListOf<String>()
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initRecyclerView()
+        binding.svDogs.setOnQueryTextListener(this)
     }
 
     private fun getRetrofit() : Retrofit {
@@ -50,6 +52,8 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     showError()
                 }
+                Log.d("query", query)
+                hideKeyboard()
             }
         }
     }
@@ -58,6 +62,22 @@ class MainActivity : AppCompatActivity() {
         adapter = DogAdapter(dogImages)
         binding.rvDogs.layoutManager = LinearLayoutManager(this)
         binding.rvDogs.adapter = adapter
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        return true
+    }
+
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        if(!query.isNullOrEmpty() ) {
+            searchByName(query)
+        }
+        return true
+    }
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.viewRoot.windowToken, 0)
     }
 
 }
