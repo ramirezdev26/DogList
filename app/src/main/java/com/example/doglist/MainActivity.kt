@@ -2,6 +2,7 @@ package com.example.doglist
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.doglist.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
@@ -32,15 +33,24 @@ class MainActivity : AppCompatActivity() {
             .build()
     }
 
+    private fun showError() {
+        Toast.makeText(this, "Ha ocurrido un error", Toast.LENGTH_SHORT).show()
+    }
+
     private fun searchByName(query:String){
         CoroutineScope(Dispatchers.IO).launch {
             val call = getRetrofit().create(APIService::class.java).getDogsByBreeds("$query/images")
             val puppies = call.body()
-                if(call.isSuccessful) {
-                    //show Recyclerview
-                }else{
-                    //show error
+            runOnUiThread {
+                if (call.isSuccessful) {
+                    val images = puppies?.images ?: emptyList()
+                    dogImages.clear()
+                    dogImages.addAll(images)
+                    adapter.notifyDataSetChanged()
+                } else {
+                    showError()
                 }
+            }
         }
     }
 
