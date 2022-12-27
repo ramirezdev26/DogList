@@ -10,6 +10,7 @@ import com.example.doglist.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -32,7 +33,16 @@ class MainActivity : AppCompatActivity(), androidx.appcompat.widget.SearchView.O
         return Retrofit.Builder()
             .baseUrl("https://dog.ceo/api/breed/")
             .addConverterFactory(GsonConverterFactory.create())
+            .client(getClient())
             .build()
+    }
+
+    private fun getClient() : OkHttpClient{
+        val client = OkHttpClient.Builder()
+            .addInterceptor(HeaderInterceptor())
+            .build()
+
+        return client
     }
 
     private fun showError() {
@@ -43,6 +53,7 @@ class MainActivity : AppCompatActivity(), androidx.appcompat.widget.SearchView.O
         CoroutineScope(Dispatchers.IO).launch {
             val call = getRetrofit().create(APIService::class.java).getDogsByBreeds("$query/images")
             val puppies = call.body()
+            Log.d("query", "$puppies")
             runOnUiThread {
                 if (call.isSuccessful) {
                     val images = puppies?.images ?: emptyList()
@@ -52,7 +63,7 @@ class MainActivity : AppCompatActivity(), androidx.appcompat.widget.SearchView.O
                 } else {
                     showError()
                 }
-                Log.d("query", query)
+
                 hideKeyboard()
             }
         }
